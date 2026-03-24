@@ -1,58 +1,86 @@
 name: build-and-deploy
 
-# Run workflow on push to main branch
 on:
   push:
     branches:
       - main
 
-# Force Node.js 24 for all actions
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 922863082632.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPO: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-backend
+  ECR_FRONTEND: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-frontend
+  ECS_CLUSTER: perler-cluster-github
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Configure AWS credentials
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build all backend services
+        run: mvn clean package -DskipTests --file backend/pom.xml
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Login to ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: true
 
-      # Build & push backend Docker image
-      - name: Build and push backend image
+      # Build & push each backend service as a separate tag in perler-backend repo
+      - name: Build and push api-gateway
         run: |
-          docker build -t perler-backend ./backend
-          docker tag perler-backend:latest 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-backend:latest
-          docker push 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-backend:latest
+          docker build -t $ECR_REPO:api-gateway ./backend/api-gateway
+          docker push $ECR_REPO:api-gateway
 
-      # Build & push frontend Docker image
-      - name: Build and push frontend image
+      - name: Build and push product-service
         run: |
-          docker build -t perler-frontend ./shop-app
-          docker tag perler-frontend:latest 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-frontend:latest
-          docker push 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-frontend:latest
+          docker build -t $ECR_REPO:product-service ./backend/product-service
+          docker push $ECR_REPO:product-service
+
+      - name: Build and push order-service
+        run: |
+          docker build -t $ECR_REPO:order-service ./backend/order-service
+          docker push $ECR_REPO:order-service
+
+      - name: Build and push inventory-service
+        run: |
+          docker build -t $ECR_REPO:inventory-service ./backend/inventory-service
+          docker push $ECR_REPO:inventory-service
+
+      - name: Build and push admin-server
+        run: |
+          docker build -t $ECR_REPO:admin-server ./backend/admin-server
+          docker push $ECR_REPO:admin-server
+
+      # Build & push frontend
+      - name: Build and push frontend
+        run: |
+          docker build -t $ECR_FRONTEND:latest ./shop-app
+          docker push $ECR_FRONTEND:latest
 
       # Deploy all services to ECS
       - name: Deploy to ECS
         run: |
-          aws ecs update-service --cluster perler-cluster-github --service admin-server-service --force-new-deployment
-          aws ecs update-service --cluster perler-cluster-github --service api-gateway-service --force-new-deployment
-          aws ecs update-service --cluster perler-cluster-github --service inventory-service-service --force-new-deployment
-          aws ecs update-service --cluster perler-cluster-github --service order-service-service --force-new-deployment
-          aws ecs update-service --cluster perler-cluster-github --service product-service-service --force-new-deployment
-          aws ecs update-service --cluster perler-cluster-github --service frontend-service --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service api-gateway-service      --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service product-service-service  --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service order-service-service    --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service inventory-service-service --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service admin-server-service     --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service frontend-service         --force-new-deployment
