@@ -1,0 +1,7 @@
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/ProductServiceApplication.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/repository/ProductRepository.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/circuitbreaker/ProductClient.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/controller/ProductController.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/model/Product.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/service/ProductService.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/product-service/src/main/java/com/shop/product/RedisConfig.java

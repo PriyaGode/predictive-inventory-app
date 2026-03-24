@@ -1,0 +1,15 @@
+com/shop/order/model/OrderRequest.class
+com/shop/order/saga/SagaOrchestrator.class
+com/shop/order/model/Order.class
+com/shop/order/saga/SagaOrchestratorReplyConsumer.class
+com/shop/order/model/OrderItem.class
+com/shop/order/OrderServiceApplication.class
+com/shop/order/repository/OrderRepository.class
+com/shop/order/circuitbreaker/InventoryClient.class
+com/shop/order/model/OrderRequest$OrderItemRequest.class
+com/shop/order/OrderConfig.class
+com/shop/order/saga/SagaEvent.class
+com/shop/order/saga/SagaChoreographyProducer.class
+com/shop/order/controller/OrderController.class
+com/shop/order/service/OrderService.class
+com/shop/order/saga/SagaChoreographyConsumer.class

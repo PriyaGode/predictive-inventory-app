@@ -1,0 +1,7 @@
+com/shop/product/circuitbreaker/ProductClient.class
+com/shop/product/controller/ProductController.class
+com/shop/product/model/Product.class
+com/shop/product/RedisConfig.class
+com/shop/product/ProductServiceApplication.class
+com/shop/product/repository/ProductRepository.class
+com/shop/product/service/ProductService.class

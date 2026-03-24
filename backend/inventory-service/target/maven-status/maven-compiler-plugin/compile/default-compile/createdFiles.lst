@@ -1,0 +1,16 @@
+com/shop/inventory/supplier/ReplenishmentTimeline.class
+com/shop/inventory/repository/InventoryRepository.class
+com/shop/inventory/kafka/StockEventProducer.class
+com/shop/inventory/config/InventoryConfig.class
+com/shop/inventory/InventoryServiceApplication.class
+com/shop/inventory/model/Inventory.class
+com/shop/inventory/supplier/Supplier.class
+com/shop/inventory/saga/SagaEvent.class
+com/shop/inventory/kafka/StockEventConsumer.class
+com/shop/inventory/saga/InventorySagaHandler.class
+com/shop/inventory/kafka/StockUpdateEvent.class
+com/shop/inventory/supplier/SupplierService.class
+com/shop/inventory/service/InventoryService.class
+com/shop/inventory/supplier/SupplierRepository.class
+com/shop/inventory/supplier/SupplierController.class
+com/shop/inventory/controller/InventoryController.class

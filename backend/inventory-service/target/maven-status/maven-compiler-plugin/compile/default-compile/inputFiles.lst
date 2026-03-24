@@ -1,0 +1,16 @@
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/kafka/StockEventProducer.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/saga/InventorySagaHandler.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/supplier/Supplier.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/repository/InventoryRepository.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/service/InventoryService.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/supplier/SupplierService.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/kafka/StockUpdateEvent.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/supplier/SupplierController.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/InventoryServiceApplication.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/supplier/SupplierRepository.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/model/Inventory.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/config/InventoryConfig.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/supplier/ReplenishmentTimeline.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/controller/InventoryController.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/saga/SagaEvent.java
+/Users/hemapriya/Desktop/Disk/Development/PerLerProj/backend/inventory-service/src/main/java/com/shop/inventory/kafka/StockEventConsumer.java
