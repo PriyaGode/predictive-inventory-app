@@ -75,6 +75,13 @@ jobs:
           docker build -t $ECR_FRONTEND:latest ./shop-app
           docker push $ECR_FRONTEND:latest
 
+      # Ensure CloudWatch log groups exist
+      - name: Ensure CloudWatch log groups
+        run: |
+          for group in admin-server-task api-gateway-task product-service-task order-service-task inventory-service-task frontend-task; do
+            aws logs describe-log-groups --log-group-name /ecs/$group || aws logs create-log-group --log-group-name /ecs/$group
+          done
+
       # Deploy all services to ECS
       - name: Deploy to ECS
         run: |
