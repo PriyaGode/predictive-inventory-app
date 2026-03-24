@@ -11,13 +11,12 @@ env:
   ECR_BACKEND_REPO: perler-backend
   ECR_FRONTEND_REPO: perler-frontend
   ECS_CLUSTER: perler-cluster-github
-  ECS_SERVICES:
-    admin: admin-server-service
-    api: api-gateway-service
-    frontend: frontend-service
-    inventory: inventory-service-service
-    order: order-service-service
-    product: product-service-service
+  ECS_ADMIN_SERVICE: admin-server-service
+  ECS_API_SERVICE: api-gateway-service
+  ECS_FRONTEND_SERVICE: frontend-service
+  ECS_INVENTORY_SERVICE: inventory-service-service
+  ECS_ORDER_SERVICE: order-service-service
+  ECS_PRODUCT_SERVICE: product-service-service
 
 jobs:
   build-and-deploy:
@@ -33,12 +32,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ---------------- Backend Services ----------------
       - name: Build & Push Backend Images
         run: |
+          # Login to ECR
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
           # Admin Server
           docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND_REPO:admin ./backend/admin-server
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND_REPO:admin
 
           # API Gateway
@@ -57,18 +57,16 @@ jobs:
           docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND_REPO:product ./backend/product-service
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND_REPO:product
 
-      # ---------------- Frontend Service ----------------
       - name: Build & Push Frontend Image
         run: |
           docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND_REPO:latest ./shop-app
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND_REPO:latest
 
-      # ---------------- Deploy to ECS ----------------
-      - name: Update ECS Services
+      - name: Deploy to ECS
         run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.admin }} --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.api }} --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.inventory }} --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.order }} --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.product }} --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service ${{ env.ECS_SERVICES.frontend }} --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_ADMIN_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_API_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_INVENTORY_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_ORDER_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_PRODUCT_SERVICE --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_FRONTEND_SERVICE --force-new-deployment
