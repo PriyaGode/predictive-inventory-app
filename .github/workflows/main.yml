@@ -43,7 +43,7 @@ jobs:
         with:
           mask-password: true
 
-      # Build & push each backend service as a separate tag in perler-backend repo
+      # Build & push backend images
       - name: Build and push api-gateway
         run: |
           docker build -t $ECR_REPO:api-gateway ./backend/api-gateway
@@ -79,7 +79,13 @@ jobs:
       - name: Ensure CloudWatch log groups
         run: |
           for group in admin-server-task api-gateway-task product-service-task order-service-task inventory-service-task frontend-task; do
-            aws logs describe-log-groups --log-group-name /ecs/$group || aws logs create-log-group --log-group-name /ecs/$group
+            # Check if log group exists
+            if ! aws logs describe-log-groups --log-group-name-prefix /ecs/$group --region ${{ env.AWS_REGION }} | grep -q "\"logGroupName\": \"/ecs/$group\""; then
+              echo "Creating log group /ecs/$group"
+              aws logs create-log-group --log-group-name /ecs/$group --region ${{ env.AWS_REGION }} || true
+            else
+              echo "Log group /ecs/$group already exists"
+            fi
           done
 
       # Deploy all services to ECS
