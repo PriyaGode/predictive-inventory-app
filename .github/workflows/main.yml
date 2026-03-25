@@ -1,99 +1,97 @@
-name: build-and-deploy
-
-on:
-  push:
-    branches:
-      - main
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  AWS_REGION: us-east-1
-  ECR_REGISTRY: 922863082632.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPO: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-backend
-  ECR_FRONTEND: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-frontend
-  ECS_CLUSTER: perler-cluster-github
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Build all backend services
-        run: mvn clean package -DskipTests --file backend/pom.xml
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: true
-
-      # Build & push backend images
-      - name: Build and push api-gateway
-        run: |
-          docker build -t $ECR_REPO:api-gateway ./backend/api-gateway
-          docker push $ECR_REPO:api-gateway
-
-      - name: Build and push product-service
-        run: |
-          docker build -t $ECR_REPO:product-service ./backend/product-service
-          docker push $ECR_REPO:product-service
-
-      - name: Build and push order-service
-        run: |
-          docker build -t $ECR_REPO:order-service ./backend/order-service
-          docker push $ECR_REPO:order-service
-
-      - name: Build and push inventory-service
-        run: |
-          docker build -t $ECR_REPO:inventory-service ./backend/inventory-service
-          docker push $ECR_REPO:inventory-service
-
-      - name: Build and push admin-server
-        run: |
-          docker build -t $ECR_REPO:admin-server ./backend/admin-server
-          docker push $ECR_REPO:admin-server
-
-      # Build & push frontend
-      - name: Build and push frontend
-        run: |
-          docker build -t $ECR_FRONTEND:latest ./shop-app
-          docker push $ECR_FRONTEND:latest
-
-      # Ensure CloudWatch log groups exist
-      - name: Ensure CloudWatch log groups
-        run: |
-          for group in admin-server-task api-gateway-task product-service-task order-service-task inventory-service-task frontend-task; do
-            # Check if log group exists
-            if ! aws logs describe-log-groups --log-group-name-prefix /ecs/$group --region ${{ env.AWS_REGION }} | grep -q "\"logGroupName\": \"/ecs/$group\""; then
-              echo "Creating log group /ecs/$group"
-              aws logs create-log-group --log-group-name /ecs/$group --region ${{ env.AWS_REGION }} || true
-            else
-              echo "Log group /ecs/$group already exists"
-            fi
-          done
-
-      # Deploy all services to ECS
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service api-gateway-service      --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service product-service-service  --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service order-service-service    --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service inventory-service-service --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service admin-server-service     --force-new-deployment
-          aws ecs update-service --cluster $ECS_CLUSTER --service frontend-service         --force-new-deployment
+## name: build-and-deploy
+#
+#on:
+#  workflow_dispatch:  # only runs manually from GitHub Actions tab
+#
+#env:
+#  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+#  AWS_REGION: us-east-1
+#  ECR_REGISTRY: 922863082632.dkr.ecr.us-east-1.amazonaws.com
+#  ECR_REPO: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-backend
+#  ECR_FRONTEND: 922863082632.dkr.ecr.us-east-1.amazonaws.com/perler-frontend
+#  ECS_CLUSTER: perler-cluster-github
+#
+#jobs:
+#  build-and-deploy:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#          cache: maven
+#
+#      - name: Build all backend services
+#        run: mvn clean package -DskipTests --file backend/pom.xml
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v2
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: ${{ env.AWS_REGION }}
+#
+#      - name: Login to Amazon ECR
+#        uses: aws-actions/amazon-ecr-login@v2
+#        with:
+#          mask-password: true
+#
+#      # Build & push backend images
+#      - name: Build and push api-gateway
+#        run: |
+#          docker build -t $ECR_REPO:api-gateway ./backend/api-gateway
+#          docker push $ECR_REPO:api-gateway
+#
+#      - name: Build and push product-service
+#        run: |
+#          docker build -t $ECR_REPO:product-service ./backend/product-service
+#          docker push $ECR_REPO:product-service
+#
+#      - name: Build and push order-service
+#        run: |
+#          docker build -t $ECR_REPO:order-service ./backend/order-service
+#          docker push $ECR_REPO:order-service
+#
+#      - name: Build and push inventory-service
+#        run: |
+#          docker build -t $ECR_REPO:inventory-service ./backend/inventory-service
+#          docker push $ECR_REPO:inventory-service
+#
+#      - name: Build and push admin-server
+#        run: |
+#          docker build -t $ECR_REPO:admin-server ./backend/admin-server
+#          docker push $ECR_REPO:admin-server
+#
+#      # Build & push frontend
+#      - name: Build and push frontend
+#        run: |
+#          docker build -t $ECR_FRONTEND:latest ./shop-app
+#          docker push $ECR_FRONTEND:latest
+#
+#      # Ensure CloudWatch log groups exist
+#      - name: Ensure CloudWatch log groups
+#        run: |
+#          for group in admin-server-task api-gateway-task product-service-task order-service-task inventory-service-task frontend-task; do
+#            # Check if log group exists
+#            if ! aws logs describe-log-groups --log-group-name-prefix /ecs/$group --region ${{ env.AWS_REGION }} | grep -q "\"logGroupName\": \"/ecs/$group\""; then
+#              echo "Creating log group /ecs/$group"
+#              aws logs create-log-group --log-group-name /ecs/$group --region ${{ env.AWS_REGION }} || true
+#            else
+#              echo "Log group /ecs/$group already exists"
+#            fi
+#          done
+#
+#      # Deploy all services to ECS
+#      - name: Deploy to ECS
+#        run: |
+#          aws ecs update-service --cluster $ECS_CLUSTER --service api-gateway-service      --force-new-deployment
+#          aws ecs update-service --cluster $ECS_CLUSTER --service product-service-service  --force-new-deployment
+#          aws ecs update-service --cluster $ECS_CLUSTER --service order-service-service    --force-new-deployment
+#          aws ecs update-service --cluster $ECS_CLUSTER --service inventory-service-service --force-new-deployment
+#          aws ecs update-service --cluster $ECS_CLUSTER --service admin-server-service     --force-new-deployment
+#          aws ecs update-service --cluster $ECS_CLUSTER --service frontend-service         --force-new-deployment

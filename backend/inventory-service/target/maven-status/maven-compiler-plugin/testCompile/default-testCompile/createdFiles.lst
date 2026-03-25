@@ -1,1 +1,3 @@
 com/shop/inventory/service/InventoryServiceTest.class
+com/shop/inventory/supplier/SupplierServiceTest.class
+com/shop/inventory/supplier/SupplierControllerTest.class

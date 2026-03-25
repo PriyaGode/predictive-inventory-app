@@ -35,12 +35,43 @@ public class InventoryController {
         return service.getLowStockItems();
     }
 
-    // Task 1: Manual stock update endpoint (also triggers Kafka event)
     @PostMapping("/update-stock")
     public ResponseEntity<String> updateStock(@RequestBody StockUpdateEvent event) {
         boolean success = service.updateStock(event.getProductId(), event.getQuantityChange(), event.getReason());
         if (success) return ResponseEntity.ok("Stock updated successfully");
         return ResponseEntity.badRequest().body("Stock update failed — insufficient stock");
+    }
+
+    /** Reserve stock for a pending order */
+    @PostMapping("/product/{productId}/reserve")
+    public ResponseEntity<String> reserveStock(@PathVariable Long productId, @RequestParam int qty) {
+        boolean ok = service.reserveStock(productId, qty);
+        return ok ? ResponseEntity.ok("Reserved " + qty + " units for productId=" + productId)
+                  : ResponseEntity.badRequest().body("Reserve failed — insufficient available stock");
+    }
+
+    /** Release reserved stock (order cancelled or fulfilled) */
+    @PostMapping("/product/{productId}/release")
+    public ResponseEntity<String> releaseStock(@PathVariable Long productId, @RequestParam int qty) {
+        boolean ok = service.releaseStock(productId, qty);
+        return ok ? ResponseEntity.ok("Released " + qty + " units for productId=" + productId)
+                  : ResponseEntity.badRequest().body("Release failed");
+    }
+
+    /** Mark stock as incoming (supplier shipment dispatched) */
+    @PostMapping("/product/{productId}/incoming")
+    public ResponseEntity<String> addIncoming(@PathVariable Long productId, @RequestParam int qty) {
+        boolean ok = service.addIncomingStock(productId, qty);
+        return ok ? ResponseEntity.ok("Marked " + qty + " units as incoming for productId=" + productId)
+                  : ResponseEntity.badRequest().body("Product not found");
+    }
+
+    /** Receive incoming stock — moves it into physical quantity */
+    @PostMapping("/product/{productId}/receive")
+    public ResponseEntity<String> receiveIncoming(@PathVariable Long productId, @RequestParam int qty) {
+        boolean ok = service.receiveIncomingStock(productId, qty);
+        return ok ? ResponseEntity.ok("Received " + qty + " units into stock for productId=" + productId)
+                  : ResponseEntity.badRequest().body("Receive failed");
     }
 
     @PostMapping
